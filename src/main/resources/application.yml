@@ -1,0 +1,52 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: todoapp
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/todoApp
+    username: postgres
+    password: mysecretpassword
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+jwt:
+  secret: "d3f1c9a2b7e84c1f9a6e2b0c4d8f1a3b7c9d2e4f6a8b0c2d4e6f8a0b2c4d6e8"
+  access-token-expiration-seconds: 900
+  issuer: "todoapp"
+
+auth:
+  refresh-token-days: 7
+
+app:
+  pagination:
+    default-size: 20
+    max-size: 100
+  cache:
+    todo-list-ttl-minutes: 5
+    todo-single-ttl-minutes: 10
+    profile-ttl-minutes: 30
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
