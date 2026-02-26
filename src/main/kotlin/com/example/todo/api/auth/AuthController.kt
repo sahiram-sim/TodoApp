@@ -36,7 +36,6 @@ class AuthController(
 
     @PostMapping("/refresh")
     fun refresh(@Valid @RequestBody req: RefreshRequest): ResponseEntity<AuthResponse> {
-        // Do NOT log refresh token
         logger.info("Auth refresh attempt")
         val result = authService.refresh(req.refreshToken)
         logger.info("Auth refresh success")
@@ -46,7 +45,6 @@ class AuthController(
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun logout(@Valid @RequestBody req: RefreshRequest) {
-        // Do NOT log refresh token
         logger.info("Auth logout attempt")
         authService.logout(req.refreshToken)
         logger.info("Auth logout success")
