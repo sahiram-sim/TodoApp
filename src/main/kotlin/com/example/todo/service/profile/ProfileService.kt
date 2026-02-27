@@ -32,7 +32,7 @@ class ProfileService(private val userRepository: UserRepository) {
 
         val id = user.id ?: throw IllegalStateException("User id missing")
 
-        return ProfileResponse(id = id, email = user.email, username = user.username)
+        return ProfileResponse(id = id, email = user.email, username = user.username, role = user.role)
     }
 
     @Transactional
@@ -76,6 +76,6 @@ class ProfileService(private val userRepository: UserRepository) {
 
         logger.info("Profile update success userId={}", userId)
 
-        return ProfileResponse(id = id, email = saved.email, username = saved.username)
+        return ProfileResponse(id = id, email = saved.email, username = saved.username, role = saved.role)
     }
 }

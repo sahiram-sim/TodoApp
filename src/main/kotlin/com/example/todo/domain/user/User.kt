@@ -25,5 +25,8 @@ class User(
     var username: String,
 
     @Column(nullable = false)
-    var passwordHash: String?
+    var passwordHash: String?,
+
+    @Column(nullable = false)
+    var role: String
 )

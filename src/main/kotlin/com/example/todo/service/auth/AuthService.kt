@@ -27,8 +27,9 @@ class AuthService(
     fun register(req: RegisterRequest): AuthResponse {
         val email = req.email.trim().lowercase()
         val username = req.username.trim()
+        val role = req.role.trim()
 
-        logger.info("Register attempt emailDomain={} username={}", email.substringAfter("@", "unknown"), username)
+        logger.info("Register attempt emailDomain={} username={} and role={}", email.substringAfter("@", "unknown"), username, role)
 
         if (userRepository.existsByEmail(email)) {
             logger.warn("Register rejected: email exists emailDomain={}", email.substringAfter("@", "unknown"))
@@ -42,6 +43,7 @@ class AuthService(
         val user = User(
             email = email,
             username = username,
+            role = role,
             passwordHash = passwordEncoder.encode(req.password)
         )
 
