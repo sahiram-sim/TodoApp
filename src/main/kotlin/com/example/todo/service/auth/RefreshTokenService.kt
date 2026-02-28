@@ -5,6 +5,8 @@ import com.example.todo.domain.token.RefreshToken
 import com.example.todo.domain.token.RefreshTokenRepository
 import com.example.todo.domain.user.User
 import com.example.todo.exception.UnauthorizedException
+import com.example.todo.api.auth.dto.SessionResponse
+import com.example.todo.exception.NotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.security.MessageDigest
@@ -90,5 +92,27 @@ class RefreshTokenService(
         val md = MessageDigest.getInstance("SHA-256")
         val bytes = md.digest(value.toByteArray(Charsets.UTF_8))
         return bytes.joinToString("") { "%02x".format(it) }
+    }
+
+    @Transactional(readOnly = true)
+    fun listSessions(userId: UUID): List<SessionResponse> =
+        repo.findAllByUserIdOrderByCreatedAtDesc(userId).map { rt ->
+            SessionResponse(
+                id = rt.id!!,
+                createdAt = rt.createdAt,
+                expiresAt = rt.expiresAt,
+                revoked = rt.revoked,
+                revokedAt = rt.revokedAt,
+                replacedByTokenId = rt.replacedByTokenId
+            )
+        }
+
+    @Transactional
+    fun revokeSession(userId: UUID, sessionId: UUID) {
+        val updated = repo.revokeByIdForUser(sessionId, userId, Instant.now())
+        if (updated == 0) {
+            // Either not found, not owned by user, or already revoked
+            throw NotFoundException("Session not found")
+        }
     }
 }

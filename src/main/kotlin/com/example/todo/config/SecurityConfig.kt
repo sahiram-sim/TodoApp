@@ -12,33 +12,44 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableMethodSecurity
-class SecurityConfig(
-    private val jwtAuthenticationFilter: JwtAuthenticationFilter
-) {
+class SecurityConfig(private val jwtAuthenticationFilter: JwtAuthenticationFilter) {
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
-            // REST API: stateless JWT
-            .csrf { it.disable() }
-            .cors(Customizer.withDefaults())
-            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+                // REST API: stateless JWT
+                .csrf { it.disable() }
+                .cors(Customizer.withDefaults())
+                .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+                .authorizeHttpRequests { auth ->
+                    auth.requestMatchers(
+                                    "/api/auth/register",
+                                    "/api/auth/login",
+                                    "/api/auth/refresh",
+                                    "/api/auth/logout",
+                                    "/api/auth/verify-email",
+                                    "/api/auth/resend-verification",
+                                    "/api/auth/forgot-password",
+                                    "/api/auth/reset-password"
+                            )
+                            .permitAll()
 
-            .authorizeHttpRequests { auth ->
-                auth
-                    // auth endpoints public
-                    .requestMatchers("/api/auth/**").permitAll()
+                            // health/docs (optional; remove if not needed)
+                            .requestMatchers("/actuator/health", "/actuator/info")
+                            .permitAll()
+                            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
+                            .permitAll()
 
-                    // health/docs (optional; remove if not needed)
-                    .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                            // everything else requires JWT
+                            .anyRequest()
+                            .authenticated()
+                }
 
-                    // everything else requires JWT
-                    .anyRequest().authenticated()
-            }
-
-            // JWT filter before username/password auth filter
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+                // JWT filter before username/password auth filter
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter::class.java
+                )
 
         return http.build()
     }

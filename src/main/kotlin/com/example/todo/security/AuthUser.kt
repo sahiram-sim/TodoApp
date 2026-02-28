@@ -7,7 +7,7 @@ import java.util.UUID
 
 data class AuthUser(
     val id: UUID,
-    private val email: String,
+    private val email: String = "",
     private val passwordHash: String,
     private val roles: List<String> = listOf("USER")
 ) : UserDetails {

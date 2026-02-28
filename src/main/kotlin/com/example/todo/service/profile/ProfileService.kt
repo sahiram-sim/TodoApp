@@ -32,7 +32,10 @@ class ProfileService(private val userRepository: UserRepository) {
 
         val id = user.id ?: throw IllegalStateException("User id missing")
 
-        return ProfileResponse(id = id, email = user.email, username = user.username, role = user.role)
+        val roleNames = user.roles.map { it.name }.toSet()
+        val role = resolvePrimaryRoleName(roleNames)
+
+        return ProfileResponse(id = id, email = user.email, username = user.username, role = role)
     }
 
     @Transactional
@@ -74,8 +77,22 @@ class ProfileService(private val userRepository: UserRepository) {
         val saved = userRepository.save(user)
         val id = saved.id ?: throw IllegalStateException("User id missing")
 
+        val roleNames = saved.roles.map { it.name }.toSet()
+        val role = resolvePrimaryRoleName(roleNames)
+
         logger.info("Profile update success userId={}", userId)
 
-        return ProfileResponse(id = id, email = saved.email, username = saved.username, role = saved.role)
+        return ProfileResponse(id = id, email = saved.email, username = saved.username, role = role)
     }
+
+    private fun resolvePrimaryRoleName(roleNames: Set<String>): String {
+    val names = roleNames.map { it.trim().uppercase() }.toSet()
+
+    return when {
+        "ADMIN" in names -> "ADMIN"
+        "USER" in names -> "USER"
+        names.isNotEmpty() -> names.first()
+        else -> "USER"
+    }
+}
 }

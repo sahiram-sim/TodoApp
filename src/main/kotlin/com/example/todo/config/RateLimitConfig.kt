@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
+import org.springframework.scheduling.annotation.Scheduled
 
 @Configuration
 class RateLimitConfig {
@@ -17,5 +18,9 @@ class RateLimitConfig {
     @Order(Ordered.HIGHEST_PRECEDENCE + 10)
     fun rateLimitFilter(store: RateLimiterStore): RateLimitFilter {
         return RateLimitFilter(store)
+    }
+
+    @Scheduled(fixedDelayString = "PT10M")
+    fun cleanupRateLimitBuckets() {
     }
 }

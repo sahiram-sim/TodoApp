@@ -29,4 +29,10 @@ interface TodoRepository : JpaRepository<Todo, UUID> {
     ): Page<Todo>
 
     fun findByIdAndDeletedAtIsNull(id: UUID): Todo?
+
+    fun findAllByDueDateBetween(d1: LocalDate, d2: LocalDate): List<Todo>
+    fun findAllByDueDateBefore(d: LocalDate): List<Todo>
+
+    fun findAllByStatusAndDueDateBetween(status: TodoStatus, d1: LocalDate, d2: LocalDate): List<Todo>
+fun findAllByStatusAndDueDateBefore(status: TodoStatus, d: LocalDate): List<Todo>
 }
