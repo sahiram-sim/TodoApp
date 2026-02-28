@@ -210,4 +210,48 @@ class TodoService(
                         evictTodoListsForUser(s.sharedWithUserId)
                 }
         }
+
+        @Transactional(readOnly = true)
+        fun listDeletedTodos(userId: UUID, pageable: Pageable): TodoListResponse {
+                val page = todoRepository.findDeletedByUser(userId, pageable)
+                return TodoListResponse(
+                        items = page.content.map(TodoResponse::from),
+                        page = page.number,
+                        size = page.size,
+                        totalElements = page.totalElements,
+                        totalPages = page.totalPages
+                )
+        }
+
+        @Transactional
+        fun restoreTodo(userId: UUID, todoId: UUID): TodoResponse {
+                val todo =
+                        todoRepository.findByIdAndUserIdAndDeletedAtIsNotNull(todoId, userId)
+                                ?: throw NotFoundException("Deleted todo not found")
+
+                todo.deletedAt = null
+                val saved = todoRepository.save(todo)
+
+                // evict caches
+                evictTodoListsForUser(userId)
+                redis.delete(
+                        "todo:${userId}:${todoId}"
+                ) // if you use CacheKeys helper, use that instead
+
+                logger.info("Todo restored userId={} todoId={}", userId, todoId)
+                return TodoResponse.from(saved)
+        }
+
+        @Transactional
+        fun hardDeleteTodo(userId: UUID, todoId: UUID) {
+                val todo =
+                        todoRepository.findByIdAndUserIdAndDeletedAtIsNotNull(todoId, userId)
+                                ?: throw NotFoundException("Deleted todo not found")
+
+                todoRepository.delete(todo)
+
+                evictTodoListsForUser(userId)
+                redis.delete("todo:${userId}:${todoId}")
+                logger.info("Todo hard-deleted userId={} todoId={}", userId, todoId)
+        }
 }

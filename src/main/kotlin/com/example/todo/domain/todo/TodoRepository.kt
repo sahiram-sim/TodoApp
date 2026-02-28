@@ -88,4 +88,18 @@ interface TodoRepository : JpaRepository<Todo, UUID> {
         @Param("dueDate") dueDate: LocalDate?,
         pageable: Pageable
     ): Page<Todo>
+
+    @Query(
+        """
+        select t from Todo t
+        where t.userId = :userId
+        and t.deletedAt is not null
+        """
+        )
+        fun findDeletedByUser(
+        @Param("userId") userId: UUID,
+        pageable: Pageable
+        ): Page<Todo>
+
+        fun findByIdAndUserIdAndDeletedAtIsNotNull(id: UUID, userId: UUID): Todo?
 }
