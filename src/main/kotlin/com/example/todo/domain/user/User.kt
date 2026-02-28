@@ -56,8 +56,8 @@ class User(
     var timezone: String = "Asia/Kolkata",
 
     @Column(name = "reminder_hour")
-    var reminderHour: Int? = null,
+    var reminderHour: Short? = null,
 
     @Column(name = "reminder_minute")
-    var reminderMinute: Int? = null,
+    var reminderMinute: Short? = null,
 )
